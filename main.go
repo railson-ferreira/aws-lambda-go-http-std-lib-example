@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/a-h/awsapigatewayv2handler"
 	"github.com/aws/aws-lambda-go/lambda"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -24,5 +26,16 @@ func init() {
 }
 
 func main() {
-	lambda.Start(httpLambdaHandler)
+	if isRunningOnLambda() {
+		// Run on AWS Lambda
+		lambda.Start(httpLambdaHandler)
+	} else {
+		// Run local server
+		fmt.Println("Running on 0.0.0.0:8080")
+		_ = http.ListenAndServe("0.0.0.0:8080", http.DefaultServeMux)
+	}
+}
+
+func isRunningOnLambda() bool {
+	return os.Getenv("AWS_LAMBDA_RUNTIME_API") != ""
 }
